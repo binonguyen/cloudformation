@@ -1,0 +1,46 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "Create new intance",
+   "Resources" : {
+        "Ec2Instance" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "ImageId" : "ami-0080e4c5bc078760e",
+                "KeyName" :"NewKey",
+                "InstanceType": "t2.micro",
+                "NetworkInterfaces": [ {
+                    "AssociatePublicIpAddress": "true",
+                    "DeviceIndex": "0",
+                    "GroupSet": [  { "Fn::GetAtt" : [ "SecurityGroup", "GroupId" ] } ],
+                    "SubnetId": "subnet-0934536d54a6ea3d8"
+                } ],
+                "Tags": [
+                    {
+                        "Key" : "Department",
+                        "Value" : "Database"
+                    }
+                ]
+            }
+        },
+        "SecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+               "GroupDescription" : "Allow http to client host",
+               "VpcId" :  "vpc-0b580da5903ccf31c",
+               "SecurityGroupIngress" : [{
+                     "IpProtocol" : "tcp",
+                     "FromPort" : 0,
+                     "ToPort" : 80,
+                     "CidrIp" : "0.0.0.0/0"
+                    
+                  }],
+               "SecurityGroupEgress" : [{
+                  "IpProtocol" : "tcp",
+                  "FromPort" : 0,
+                  "ToPort" : 80,
+                  "CidrIp" : "0.0.0.0/0"
+               }]
+            }
+        } 
+   }
+}  
