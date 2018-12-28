@@ -41,6 +41,44 @@
                "SecurityGroups" : [  { "Fn::GetAtt" : [ "SecurityGroup", "GroupId" ] } ]
             }
         },
+        "CPUAlarmHigh":{  
+            "Type":"AWS::CloudWatch::Alarm",
+            "Properties":{  
+              "AlarmDescription": "Scale Up based on EC2 CPU Utilization per 3 minutes",
+              "MetricName":"CPUUtilization",
+              "Namespace":"AWS/EC2",
+              "Statistic":"Average",
+              "Period":"60",
+              "EvaluationPeriods":"3",
+              "Threshold":"10",
+              "AlarmActions":[ { "Ref":"ScaleUpPolicy" } ],
+              "Dimensions":[  
+                {  
+                  "Name":"AutoScalingGroupName",
+                  "Value": { "Ref":"AutoScalingGroup" }
+                }
+              ],
+              "ComparisonOperator":"GreaterThanThreshold"
+            }
+          },
+        "ScaleUpPolicy":{  
+            "Type" : "AWS::AutoScaling::ScalingPolicy",
+            "Properties" : {
+                "AdjustmentType" : "ChangeInCapacity",
+                "PolicyType" : "SimpleScaling",	
+                "Cooldown" : "60",
+                "AutoScalingGroupName" : { "Ref" : "AutoScalingGroup" },
+                "ScalingAdjustment" : 1
+            }
+        },
+        "ApplicationLoadBalancer" : {
+            "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties" : {
+              "Scheme" : "internet-facing",
+              "Subnets" : ["subnet-0aedac0c9bd956ed2","subnet-04c6fb149b3adc6c9"],
+              "SecurityGroups" : [{ "Fn::GetAtt" : [ "SecurityGroup", "GroupId" ] }]
+            }
+        },
         "ALBListener" : {
             "Type" : "AWS::ElasticLoadBalancingV2::Listener",
             "Properties" : {
@@ -51,14 +89,6 @@
               "LoadBalancerArn" : { "Ref" : "ApplicationLoadBalancer" },
               "Port" : "80",
               "Protocol" : "HTTP"
-            }
-        },
-        "ApplicationLoadBalancer" : {
-            "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
-            "Properties" : {
-              "Scheme" : "internet-facing",
-              "Subnets" : ["subnet-0aedac0c9bd956ed2","subnet-04c6fb149b3adc6c9"],
-              "SecurityGroups" : [{ "Fn::GetAtt" : [ "SecurityGroup", "GroupId" ] }]
             }
         },
         "ALBTargetGroup" : {
