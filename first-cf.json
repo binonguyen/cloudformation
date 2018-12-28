@@ -38,8 +38,16 @@
                "KeyName" : "NewKey",
                "InstanceType": "t2.micro",
                "ImageId" : "ami-0080e4c5bc078760e",
-               "SecurityGroups" : [  { "Fn::GetAtt" : [ "SecurityGroup", "GroupId" ] } ]
+               "SecurityGroups" : [  { "Fn::GetAtt" : [ "SecurityGroup", "GroupId" ] } ],
+               "UserData" : { "Fn::Base64" : { "Fn::Join":
+                [ "", [
+                    "#!/bin/bash\n",
+                    "sudo yum install httpd -y\n",
+                    "sudo service httpd start"
+                ]]
+               }}
             }
+            
         },
         "CPUAlarmHigh":{  
             "Type":"AWS::CloudWatch::Alarm",
@@ -50,7 +58,7 @@
               "Statistic":"Average",
               "Period":"60",
               "EvaluationPeriods":"3",
-              "Threshold":"10",
+              "Threshold":"0.2",
               "AlarmActions":[ { "Ref":"ScaleUpPolicy" } ],
               "Dimensions":[  
                 {  
