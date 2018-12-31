@@ -1,0 +1,27 @@
+import json
+import boto3
+import os
+def lambda_handler(event, context):
+    
+    client = boto3.client('ec2')
+    InstanceId=event['detail']["EC2InstanceId"]
+    
+    response = client.describe_instances(InstanceIds=[event['detail']["EC2InstanceId"]])
+    privateIP = response['Reservations'][0]['Instances'][0]['PrivateIpAddress']
+    
+    
+    
+    s3 = boto3.resource('s3')
+    s3.meta.client.download_file('bucket101990', 'ipAddress.txt', '/tmp/ipAddress.txt')
+    
+    
+    with open('/tmp/ipAddress.txt', 'a') as fd:
+        fd.write(',' + privateIP)
+    
+    
+    s3.meta.client.upload_file('/tmp/ipAddress.txt', 'bucket101990', 'ipAddress.txt')
+
+
+
+
+
